@@ -10,7 +10,7 @@
 | | Phase A（dev） | Phase B（production） |
 |--|----------------|----------------------|
 | **用途** | Kakuly Site Studio の iframe、ローカル `npm run dev` | のんです本人・運用者がブラウザから本番編集 |
-| **URL** | `http://127.0.0.1:4321/admin/`（dev 必須） | `https://<project>.pages.dev/admin/` → 将来 `https://admin.nondesu.com/admin/` |
+| **URL** | `http://127.0.0.1:4321/admin/`（dev 必須） | `https://admin.nondesu.com/`（→ `/admin/`）· MVP: `*.pages.dev/admin/` |
 | **認証** | なし（dev）または本番 OAuth を dev から試す | GitHub OAuth（Cloudflare Functions） |
 | **保存先** | ローカルファイル / 手動 commit | GitHub リポジトリへ直接 commit |
 | **デプロイ** | 手動 push | Cloudflare Pages 自動ビルド |
@@ -39,8 +39,8 @@
 
 ## 事前準備チェックリスト
 
-- [ ] GitHub リポジトリ `YOUR_USER/nondesu` を作成し、`main` に push 済み
-- [ ] [public/admin/config.yml](../public/admin/config.yml) の `YOUR_USER/nondesu` を実 owner に変更
+- [x] GitHub リポジトリ [`Kakuly/nondesu_website`](https://github.com/Kakuly/nondesu_website) — `main` に push 済み
+- [x] [public/admin/config.yml](../public/admin/config.yml) の `repo: Kakuly/nondesu_website`
 - [ ] Cloudflare Pages プロジェクトを GitHub リポジトリに接続
 - [ ] GitHub OAuth App 作成（下記）
 - [ ] Cloudflare 環境変数 `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` 設定
@@ -53,7 +53,7 @@
 ```yaml
 backend:
   name: github
-  repo: YOUR_USER/nondesu   # ← 実際の owner/repo に変更
+  repo: Kakuly/nondesu_website
   branch: main
   auth_endpoint: api/auth   # → {CMS の origin}/api/auth
 
@@ -81,7 +81,7 @@ display_url: https://nondesu.com
 
 推奨:
 
-1. **MVP 用 App** — callback: `https://nondesu.pages.dev/api/callback`（実際の `*.pages.dev` に合わせる）
+1. **MVP 用 App** — callback: `https://nondesu-website.pages.dev/api/callback`
 2. **本番用 App** — callback: `https://admin.nondesu.com/api/callback`（cutover 時に Client ID/Secret を Cloudflare 側で差し替え）
 
 作成後 **Client ID** と **Generate a new client secret** の **Client Secret** を控える。
@@ -118,7 +118,7 @@ Dashboard → **Workers & Pages** → プロジェクト `nondesu` → **Setting
 
 ## 5. MVP 検証（`*.pages.dev`）
 
-Cloudflare のデフォルト URL を `<project>.pages.dev` とする（例: `nondesu.pages.dev`）。
+Cloudflare Pages URL: **`https://nondesu-website.pages.dev`**（プロジェクト名 `nondesu-website`）。
 
 ### 手順
 
@@ -143,18 +143,31 @@ Cloudflare のデフォルト URL を `<project>.pages.dev` とする（例: `no
 
 ---
 
-## 6. admin.nondesu.com への移行
+## 6. admin.nondesu.com（本番 CMS）
 
-ドメイン取得前は MVP の `*.pages.dev/admin/` で運用。取得後:
+同一 Pages プロジェクト・同一 `dist` に **`nondesu.com`** と **`admin.nondesu.com`** の両方を Custom domain として追加する（Option A）。
 
 ### 6.1 DNS / Cloudflare Pages
 
-1. `nondesu.com` を Pages プロジェクトの Custom domain に追加（公開サイト）
-2. **`admin.nondesu.com`** も **同じ Pages プロジェクト** に Custom domain として追加  
-   - CMS は `https://admin.nondesu.com/admin/` でアクセス
-   - 公開サイトは `https://nondesu.com` のまま
+1. `nondesu.com` → 公開サイト
+2. `admin.nondesu.com` → 同じ Pages プロジェクト（CMS 入口）
 
-### 6.2 GitHub OAuth App（本番用）
+### 6.2 リダイレクト（`public/_redirects` + `functions/_middleware.ts`）
+
+Cloudflare Pages の `_redirects` は **Host 条件非対応**（domain-level redirects 不可）。path だけの `/admin → admin サブドメイン` ルールを入れると **admin 側の CMS も巻き込んでループ**するため、実装は **`functions/_middleware.ts` のみ**。`public/_redirects` はルール一覧のドキュメント（コメント）として残す。
+
+| リクエスト | 動作 |
+|------------|------|
+| `https://admin.nondesu.com/` | 302 → `/admin/` |
+| `https://admin.nondesu.com/admin` | 302 → `/admin/` |
+| `https://admin.nondesu.com/profile` 等 | 302 → `https://nondesu.com/profile` |
+| `https://admin.nondesu.com/api/*` | そのまま（OAuth） |
+| `https://admin.nondesu.com/admin/*` · `/assets/*` | そのまま（CMS · アップロード） |
+| `https://nondesu.com/admin` · `/admin/*` | 302 → `https://admin.nondesu.com/admin/…` |
+
+**CMS の入口 URL**: `https://admin.nondesu.com/`（ルートが `/admin/` へリダイレクト）
+
+### 6.3 GitHub OAuth App（本番用）
 
 新規 OAuth App または既存 App の callback を更新:
 
@@ -163,7 +176,7 @@ Cloudflare のデフォルト URL を `<project>.pages.dev` とする（例: `no
 
 Cloudflare の `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` を本番 App の値に更新 → 再デプロイ。
 
-### 6.3 config.yml
+### 6.4 config.yml
 
 `site_url` / `display_url` は公開サイトのまま:
 
@@ -174,13 +187,13 @@ display_url: https://nondesu.com
 
 `auth_endpoint` は変更不要（admin サブドメイン origin で `/api/auth` が動く）。
 
-### 6.4 移行チェックリスト
+### 6.5 移行チェックリスト
 
 - [ ] `nondesu.com` → Pages Custom domain、SSL 有効
 - [ ] `admin.nondesu.com` → 同じ Pages プロジェクトに追加
 - [ ] 本番 OAuth App の callback = `https://admin.nondesu.com/api/callback`
 - [ ] Cloudflare env vars を本番 App に差し替え
-- [ ] `https://admin.nondesu.com/admin/` で Login → 編集 → commit 確認
+- [ ] `https://admin.nondesu.com/`（→ `/admin/`）で Login → 編集 → commit 確認
 - [ ] `https://nondesu.com` に変更が反映されること確認
 - [ ] MVP 用 OAuth App は無効化または削除（Secret ローテーション）
 
@@ -227,6 +240,8 @@ display_url: https://nondesu.com
 |----------|------|
 | [public/admin/config.yml](../public/admin/config.yml) | Decap コレクション定義 |
 | [public/admin/index.html](../public/admin/index.html) | CMS エントリ |
+| [functions/_middleware.ts](../functions/_middleware.ts) | admin / 公開ドメイン間リダイレクト |
+| [public/_redirects](../public/_redirects) | CMS path リダイレクト（補助） |
 | [functions/api/auth.ts](../functions/api/auth.ts) | OAuth 開始 |
 | [functions/api/callback.ts](../functions/api/callback.ts) | OAuth 完了 → token |
 | [.env.example](../.env.example) | 環境変数一覧 |

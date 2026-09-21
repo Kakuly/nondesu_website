@@ -75,7 +75,7 @@ Cloudflare Pages の **Settings → Environment variables** に設定:
 2. Cloudflare Pages プロジェクト → **Custom domains**
 3. `nondesu.com` を追加し、DNS 案内に従う
 
-ドメイン取得前は `https://nondesu.pages.dev` などの `*.pages.dev` URL で公開できます。
+ドメイン取得前は [https://nondesu-website.pages.dev](https://nondesu-website.pages.dev) で公開（リポジトリ: `Kakuly/nondesu_website`）。
 
 ## Decap CMS（/admin）
 
@@ -90,7 +90,7 @@ Cloudflare Pages の **Settings → Environment variables** に設定:
 
 要点:
 
-1. [public/admin/config.yml](public/admin/config.yml) の `YOUR_USER/nondesu` を実リポジトリに変更
+1. [public/admin/config.yml](public/admin/config.yml) の `repo` が `Kakuly/nondesu_website` であること（済）
 2. GitHub OAuth App — callback は **`{CMS origin}/api/callback`**（`/admin/` ではない）
 3. Cloudflare に `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` を設定
 4. `/admin/` から Login with GitHub → 編集 → Publish
