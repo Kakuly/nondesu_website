@@ -55,14 +55,14 @@ backend:
   name: github
   repo: Kakuly/nondesu_website
   branch: main
-  auth_endpoint: api/auth   # → {CMS の origin}/api/auth
+  auth_endpoint: /api/auth   # 先頭 / 必須（api/auth だと /admin/api/auth になり 404）
 
 site_url: https://nondesu.com
 display_url: https://nondesu.com
 ```
 
 - **`repo` / `branch`**: commit 先。`main` 保護は後述。
-- **`auth_endpoint`**: `base_url` 未指定時、CMS を開いた **同じ origin** の `/api/auth` を使う。
+- **`auth_endpoint`**: **`/api/auth`**（ルート相対）。`api/auth` だと Decap が `/admin/api/auth` を叩き Not Found になる。
 - **`site_url`**: 公開サイト URL（プレビューリンク）。ドメイン未取得時も `nondesu.com` のままで可（取得後に有効化）。
 
 ---
