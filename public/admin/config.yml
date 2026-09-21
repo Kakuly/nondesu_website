@@ -7,6 +7,7 @@ backend:
   repo: Kakuly/nondesu_website
   branch: main
   auth_endpoint: /api/auth
+  # base_url: set at runtime in index.html (CMS.init) — required for Decap 3.x OAuth
 
 local_backend: false
 

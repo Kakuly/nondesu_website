@@ -8,6 +8,19 @@
   </head>
   <body>
     <!-- Phase B: GitHub OAuth via Cloudflare Pages Functions (/api/auth, /api/callback) -->
+    <script>window.CMS_MANUAL_INIT = true;</script>
     <script src="https://unpkg.com/decap-cms@3.6.2/dist/decap-cms.js"></script>
+    <script>
+      // Decap CMS 3.x GitHub backend uses Netlify Auth client (kR). Without backend.base_url
+      // it defaults to https://api.netlify.com — auth_endpoint alone is not enough.
+      CMS.init({
+        config: {
+          backend: {
+            base_url: window.location.origin,
+            auth_endpoint: "/api/auth",
+          },
+        },
+      });
+    </script>
   </body>
 </html>

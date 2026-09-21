@@ -63,6 +63,7 @@ display_url: https://nondesu.com
 
 - **`repo` / `branch`**: commit 先。`main` 保護は後述。
 - **`auth_endpoint`**: **`/api/auth`**（ルート相対）。`api/auth` だと Decap が `/admin/api/auth` を叩き Not Found になる。
+- **`base_url`**: Decap CMS 3.x では **`auth_endpoint` だけでは不十分**。未設定時 GitHub ログインが `https://api.netlify.com/api/auth?...` に飛ぶ。[`public/admin/index.html`](../public/admin/index.html) の `CMS.init()` で `base_url: window.location.origin` を渡す（admin サブドメイン · pages.dev 両対応）。
 - **`site_url`**: 公開サイト URL（プレビューリンク）。ドメイン未取得時も `nondesu.com` のままで可（取得後に有効化）。
 
 ---
@@ -136,6 +137,7 @@ Cloudflare Pages URL: **`https://nondesu-website.pages.dev`**（プロジェク�
 | 症状 | 確認 |
 |------|------|
 | Login 後にエラー | callback URL が OAuth App と完全一致しているか（末尾スラッシュなし） |
+| Login が `api.netlify.com` に飛ぶ | `index.html` の `CMS.init()` に `backend.base_url: window.location.origin` があるか |
 | 500 on `/api/auth` | `GITHUB_CLIENT_ID` が未設定 |
 | state 不一致 | サードパーティ Cookie ブロック、別タブで callback を開いていないか |
 | commit できない | ログイン GitHub ユーザーに repo の write 権限があるか |
