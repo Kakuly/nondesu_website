@@ -6,7 +6,7 @@ backend:
   name: github
   repo: Kakuly/nondesu_website
   branch: main
-  auth_endpoint: api/auth
+  auth_endpoint: /api/auth
 
 local_backend: false
 
