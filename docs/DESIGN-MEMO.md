@@ -46,7 +46,7 @@ lit.link は連絡先・依頼情報の参照源。**公式サイトがハブ**�
 
 ## 4. コンテンツ構成
 
-Decap CMS: `public/admin/config.yml` · 編集は `/admin/` または `src/content/`
+本番 CMS: カスタム admin · `https://admin.nondesu.com/` · 詳細 [`docs/CUSTOM-ADMIN.md`](CUSTOM-ADMIN.md) · コンテンツは `src/content/`
 
 | コレクション | パス | ページ |
 |-------------|------|--------|
@@ -100,8 +100,7 @@ Decap CMS: `public/admin/config.yml` · 編集は `/admin/` または `src/conte
 | 依頼文案・公開方針 | `docs/references/commissions-memo.md` |
 | ブランド色・テーマ | `src/styles/themes/nondesu.css` |
 | デザイントークン・フォント | `src/styles/tokens.css` |
-| CMS コレクション | `public/admin/config.yml` |
-| Decap CMS 本番運用（Phase B） | `docs/DECAP-CMS-PRODUCTION.md` |
+| カスタム admin（本番 CMS） | `docs/CUSTOM-ADMIN.md` · `src/pages/admin/` |
 | 依頼フォーム API | `functions/api/contact.ts` |
 | 技術・デプロイ | `README.md` |
 | エージェント境界 | `AGENTS.md` · `../WORKSPACES.md` |
