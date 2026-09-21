@@ -1,4 +1,5 @@
 import { adminUsersConfigured, verifyAdminLogin } from "../../lib/admin-users";
+import { loadPasswordOverrides } from "../../lib/admin-passwords";
 import type { PagesEnv } from "../../lib/env";
 import { createSessionToken, sessionCookieHeader } from "../../lib/session";
 
@@ -37,7 +38,8 @@ export async function onRequestPost(context: LoginContext): Promise<Response> {
     return Response.json({ ok: false, message: "ユーザー名とパスワードを入力してください。" }, { status: 400 });
   }
 
-  const username = await verifyAdminLogin(body.username, body.password, env);
+  const overrides = await loadPasswordOverrides(env);
+  const username = await verifyAdminLogin(body.username, body.password, env, overrides);
   if (!username) {
     return Response.json({ ok: false, message: "ログイン情報が正しくありません。" }, { status: 401 });
   }

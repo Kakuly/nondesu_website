@@ -53,6 +53,22 @@ export function adminUsersConfigured(env: PagesEnv): boolean {
   return loadAdminUsers(env).length > 0;
 }
 
+export function findAdminUser(username: string, env: PagesEnv): AdminUser | undefined {
+  const trimmed = username.trim();
+  return loadAdminUsers(env).find((user) => timingSafeEqual(user.username, trimmed));
+}
+
+function effectiveCredentials(
+  user: AdminUser,
+  overrides: Record<string, string>,
+): Pick<AdminUser, "password" | "passwordHash"> {
+  const override = overrides[user.username];
+  if (override) {
+    return { password: override };
+  }
+  return { password: user.password, passwordHash: user.passwordHash };
+}
+
 /**
  * Verify login credentials. Returns the matched username on success.
  * Uses timing-safe checks; always runs password verification even when username is wrong.
@@ -61,6 +77,7 @@ export async function verifyAdminLogin(
   inputUsername: string,
   password: string,
   env: PagesEnv,
+  overrides: Record<string, string> = {},
 ): Promise<string | null> {
   const users = loadAdminUsers(env);
   if (users.length === 0) return null;
@@ -76,7 +93,8 @@ export async function verifyAdminLogin(
   }
 
   const target = matched ?? users[0];
-  const valid = await verifyPasswordAgainstCredentials(password, target);
+  const credentials = effectiveCredentials(target, overrides);
+  const valid = await verifyPasswordAgainstCredentials(password, credentials);
   if (!matched || !valid) return null;
 
   return matched.username;

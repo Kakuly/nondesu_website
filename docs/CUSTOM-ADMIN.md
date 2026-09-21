@@ -10,6 +10,7 @@
 |------|-----|
 | **入口** | `https://admin.nondesu.com/` → `/admin/` |
 | **認証** | 2 アカウント（`ADMIN_USER_1` / `ADMIN_PASS_1` など）→ HttpOnly セッション Cookie |
+| **パスワード** | 初期値は Cloudflare 環境変数。admin 内で変更すると `password-overrides.yaml` に commit |
 | **保存** | Cloudflare Functions が `GITHUB_TOKEN` で GitHub Contents API に commit |
 | **公開サイト** | `https://nondesu.com`（変更なし） |
 
@@ -23,6 +24,7 @@
 編集者ブラウザ
   └─ /admin/  (Astro 静的 UI)
        └─ POST /api/admin/login  → セッション Cookie
+       └─ POST /api/admin/password  → password-overrides.yaml を commit
        └─ GET/PUT /api/admin/content/*  (Pages Functions)
             └─ GitHub Contents API (GITHUB_TOKEN)
                  └─ Cloudflare Pages が main をビルド → nondesu.com 更新
@@ -52,15 +54,30 @@ Cloudflare Dashboard → Environment variables に次の 4 つを追加（Produc
 
 ```env
 ADMIN_USER_1=nondesu
-ADMIN_PASS_1=<のんです用パスワード>
+ADMIN_PASS_1=mochi-admin-4728
 ADMIN_USER_2=kakuly
-ADMIN_PASS_2=<運用者用パスワード>
+ADMIN_PASS_2=omocha-box-9153
 ```
 
 - **のんです** — ユーザー名 `nondesu` + 本人用パスワード
 - **Kakuly（運用者）** — ユーザー名 `kakuly` + 運用者用パスワード
+- 上記は **初期パスワードの例**（本番では別の値に差し替える）
 - ログイン後、セッション Cookie にユーザー名が入る（どちらのアカウントか区別可能）
 - 外側の **Cloudflare Access（メール PIN）** が先にかかるため、平文パスワードでも運用上問題ない想定
+
+### パスワード変更（admin 内）
+
+1. ログイン → ダッシュボード → **アカウント設定**（`/admin/settings/`）
+2. 現在のパスワード + 新しいパスワード（8 文字以上）を入力して保存
+3. Functions が GitHub に `src/content/admin/password-overrides.yaml` を commit
+
+**照合の優先順位**
+
+1. `password-overrides.yaml` にそのユーザー名のエントリがあれば **そちらを使用**
+2. なければ Cloudflare 環境変数（`ADMIN_PASS_1` / `ADMIN_PASS_2`）を使用
+
+変更後も環境変数の初期パスワードは残るが、**上書きファイルが優先**される。  
+Cloudflare の env は実行時に書き換えられないため、変更分は Git 管理ファイルに保存する。
 
 ### 旧 1 アカウント設定（後方互換）
 
@@ -131,9 +148,9 @@ npm run pages:dev
 
 ```env
 ADMIN_USER_1=nondesu
-ADMIN_PASS_1=dev-nondesu-password
+ADMIN_PASS_1=mochi-admin-4728
 ADMIN_USER_2=kakuly
-ADMIN_PASS_2=dev-kakuly-password
+ADMIN_PASS_2=omocha-box-9153
 SESSION_SECRET=local-dev-secret-change-me
 GITHUB_TOKEN=ghp_...
 GITHUB_REPO=Kakuly/nondesu_website
@@ -165,6 +182,7 @@ Phase A（SITE ハブ iframe + ローカル dev）は Astro 開発用として�
 | HTTPS + HttpOnly セッション Cookie | ✓ |
 | 2 アカウント（のんです + 運用者） | ✓ |
 | タイミングセーフなパスワード照合 | ✓ |
+| admin 内パスワード変更（現パスワード必須） | ✓ |
 | GitHub PAT はサーバー側のみ | ✓ |
 | Cloudflare Access（メール PIN） | **運用者が Zero Trust で設定** |
 | ログイン rate limit / CSRF トークン | 未実装（将来） |
@@ -180,6 +198,10 @@ Phase A（SITE ハブ iframe + ローカル dev）は Astro 開発用として�
 | `src/styles/admin.css` | pastel / おもちゃ箱トーン |
 | `functions/api/admin/` | login / session / content API |
 | `functions/lib/admin-users.ts` | 複数 admin アカウントの読み込み・照合 |
+| `functions/lib/admin-passwords.ts` | パスワード上書きファイルの読み書き・変更 |
+| `src/content/admin/password-overrides.yaml` | admin 内で変更したパスワード（Git 管理） |
+| `src/pages/admin/settings.astro` | パスワード変更 UI |
+| `functions/api/admin/password.ts` | パスワード変更 API |
 | `functions/lib/session.ts` | HMAC セッション Cookie |
 | `functions/lib/github.ts` | GitHub Contents API |
 | `functions/lib/yaml-content.ts` | YAML ↔ JSON（MVP スキーマ限定） |
