@@ -241,7 +241,7 @@ display_url: https://nondesu.com
 | [public/admin/config.yml](../public/admin/config.yml) | Decap コレクション定義 |
 | [public/admin/index.html](../public/admin/index.html) | CMS エントリ |
 | [functions/_middleware.ts](../functions/_middleware.ts) | admin / 公開ドメイン間リダイレクト |
-| [public/_redirects](../public/_redirects) | CMS path リダイレクト（補助） |
+| [public/_redirects](../public/_redirects) | リダイレクトルール一覧（コメント） |
 | [functions/api/auth.ts](../functions/api/auth.ts) | OAuth 開始 |
 | [functions/api/callback.ts](../functions/api/callback.ts) | OAuth 完了 → token |
 | [.env.example](../.env.example) | 環境変数一覧 |
