@@ -1,0 +1,26 @@
+[data-theme="ichiyakanon"] {
+  --cream: #fff5fb;
+  --paper: #fffafe;
+  --ink: #5a3550;
+  --ink-soft: #8a6278;
+  --line: rgba(90, 53, 80, 0.12);
+
+  --strawberry: #ff8ab8;
+  --strawberry-deep: #e85a96;
+  --mint: #ffc8e8;
+  --mint-deep: #f08ab8;
+  --lemon: #ffe0f0;
+  --lavender: #f5d0ff;
+  --sky: #ffd6ef;
+
+  --shadow-soft: 0 12px 32px rgba(255, 138, 184, 0.18);
+  --shadow-card: 0 8px 0 rgba(90, 53, 80, 0.06), 0 18px 40px rgba(232, 90, 150, 0.1);
+}
+
+[data-theme="ichiyakanon"] .site-header {
+  background: rgba(255, 245, 251, 0.88);
+}
+
+[data-theme="ichiyakanon"] .hero-badge {
+  background: linear-gradient(135deg, var(--lemon), var(--lavender));
+}

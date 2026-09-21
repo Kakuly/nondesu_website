@@ -1,0 +1,44 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Sticker from "../components/ui/Sticker.astro";
+import { getEntry } from "astro:content";
+
+const profile = await getEntry("profile", "nondesu");
+if (!profile) throw new Error("Profile not found");
+---
+
+<BaseLayout title="プロフィール" current="profile">
+  <section class="section">
+    <div class="wrap profile-layout">
+      <div>
+        <div class="profile-portrait" aria-hidden="true">のんです</div>
+        <p class="section-lede" style="margin-top: 1rem;">{profile.data.shortBio}</p>
+        <ul class="sns-list">
+          {profile.data.sns.map((item) => (
+            <li>
+              <a href={item.url} target="_blank" rel="noreferrer">
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="reading-panel prose">
+        <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+          {profile.data.roles.map((role) => (
+            <Sticker label={role} tone="mint" />
+          ))}
+        </div>
+        <h1 class="section-title">プロフィール</h1>
+        {profile.data.longBio.split("\n\n").map((paragraph) => (
+          <p>{paragraph}</p>
+        ))}
+        <p>
+          VTuber 名義 <strong>苺茶かのん（いちやかのん）</strong> の情報は
+          <a href="/ichiyakanon/">別サイト</a> にまとめています。
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

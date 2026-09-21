@@ -1,0 +1,15 @@
+---
+interface Props {
+  label: string;
+  tone?: "lavender" | "mint" | "lemon";
+}
+
+const { label, tone = "lavender" } = Astro.props;
+const tones: Record<string, string> = {
+  lavender: "background: var(--lavender)",
+  mint: "background: var(--mint)",
+  lemon: "background: var(--lemon)",
+};
+---
+
+<span class="sticker" style={tones[tone]}>{label}</span>

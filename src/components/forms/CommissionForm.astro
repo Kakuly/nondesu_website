@@ -1,0 +1,86 @@
+<form class="commission-form" data-commission-form novalidate>
+  <div class="form-field">
+    <label for="request-type">依頼種別</label>
+    <select id="request-type" name="requestType" required>
+      <option value="">選択してください</option>
+      <option value="vocal">ボーカル</option>
+      <option value="lyrics">作詞</option>
+      <option value="video">映像</option>
+      <option value="illustration">イラスト</option>
+      <option value="other">その他</option>
+    </select>
+  </div>
+
+  <div class="form-field">
+    <label for="summary">依頼内容</label>
+    <textarea
+      id="summary"
+      name="summary"
+      required
+      placeholder="用途、イメージ、文字数や尺など"
+    ></textarea>
+  </div>
+
+  <div class="form-field">
+    <label for="budget">予算感（任意）</label>
+    <input id="budget" name="budget" type="text" placeholder="例: 3万円前後" />
+  </div>
+
+  <div class="form-field">
+    <label for="deadline">希望納期（任意）</label>
+    <input id="deadline" name="deadline" type="text" placeholder="例: 2026年12月まで" />
+  </div>
+
+  <div class="form-field">
+    <label for="contact">連絡先（メール or X ID）</label>
+    <input id="contact" name="contact" type="text" required placeholder="nondesu0816@gmail.com / @_Non_desu_" />
+  </div>
+
+  <div class="form-field">
+    <label for="name">お名前（任意）</label>
+    <input id="name" name="name" type="text" />
+  </div>
+
+  <button class="button" type="submit">送信する</button>
+  <p class="form-status" data-form-status hidden></p>
+</form>
+
+<script>
+  const form = document.querySelector("[data-commission-form]");
+  const status = document.querySelector("[data-form-status]");
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!(form instanceof HTMLFormElement) || !(status instanceof HTMLElement)) return;
+
+    status.hidden = false;
+    status.className = "form-status";
+    status.textContent = "送信中…";
+
+    const payload = Object.fromEntries(new FormData(form).entries());
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = (await response.json()) as { ok?: boolean; message?: string };
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.message ?? "送信に失敗しました");
+      }
+
+      status.classList.add("is-success");
+      status.textContent = result.message ?? "送信しました。のんですから返信がありますので少々お待ちください。";
+      form.reset();
+    } catch (error) {
+      status.classList.add("is-error");
+      status.textContent =
+        error instanceof Error
+          ? error.message
+          : "送信に失敗しました。X DM またはメールでもご連絡ください。";
+    }
+  });
+</script>

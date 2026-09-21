@@ -1,0 +1,61 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import WorkCard from "../../components/portfolio/WorkCard.astro";
+import { getCollection } from "astro:content";
+
+const works = (await getCollection("works")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+
+const categories = ["all", "music", "illustration", "writing"] as const;
+---
+
+<BaseLayout title="ポートフォリオ" current="portfolio">
+  <section class="section">
+    <div class="wrap">
+      <h1 class="section-title">ポートフォリオ</h1>
+      <p class="section-lede">楽曲・イラスト・文章。カテゴリで絞り込めます。</p>
+
+      <div class="filter-bar" data-portfolio-filter>
+        {
+          categories.map((category) => (
+            <button
+              class:list={["filter-btn", category === "all" && "is-active"]}
+              type="button"
+              data-filter={category}
+            >
+              {category === "all" ? "すべて" : category}
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="toy-grid" data-portfolio-grid>
+        {works.map((work) => (
+          <div data-category={work.data.category}>
+            <WorkCard work={work} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const buttons = document.querySelectorAll("[data-filter]");
+  const items = document.querySelectorAll("[data-category]");
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const filter = button.getAttribute("data-filter");
+      buttons.forEach((btn) => btn.classList.remove("is-active"));
+      button.classList.add("is-active");
+
+      items.forEach((item) => {
+        if (!(item instanceof HTMLElement)) return;
+        const category = item.getAttribute("data-category");
+        item.hidden = filter !== "all" && category !== filter;
+      });
+    });
+  });
+</script>

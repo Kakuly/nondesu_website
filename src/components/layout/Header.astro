@@ -1,0 +1,60 @@
+---
+interface Props {
+  current?: "home" | "profile" | "portfolio" | "commissions";
+  theme?: "nondesu" | "ichiyakanon";
+}
+
+const { current, theme = "nondesu" } = Astro.props;
+
+const links =
+  theme === "ichiyakanon"
+    ? [
+        { href: "/ichiyakanon/", id: "home", label: "ホーム" },
+        { href: "/ichiyakanon/#streams", id: "streams", label: "配信" },
+        { href: "/ichiyakanon/#events", id: "events", label: "イベント" },
+        { href: "/ichiyakanon/#goods", id: "goods", label: "グッズ" },
+      ]
+    : [
+        { href: "/", id: "home", label: "ホーム" },
+        { href: "/profile", id: "profile", label: "プロフィール" },
+        { href: "/portfolio", id: "portfolio", label: "ポートフォリオ" },
+        { href: "/commissions", id: "commissions", label: "依頼" },
+      ];
+---
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="logo" href={theme === "ichiyakanon" ? "/ichiyakanon/" : "/"}>
+      <span class="logo-mark" aria-hidden="true"></span>
+      {theme === "ichiyakanon" ? "苺茶かのん" : "nondesu"}
+    </a>
+    <button
+      class="nav-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="site-nav"
+      data-nav-toggle
+    >
+      メニュー
+    </button>
+    <nav id="site-nav" class="site-nav" aria-label="メイン" data-site-nav>
+      {
+        links.map((link) => (
+          <a href={link.href} aria-current={current === link.id ? "page" : undefined}>
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector("[data-nav-toggle]");
+  const nav = document.querySelector("[data-site-nav]");
+
+  toggle?.addEventListener("click", () => {
+    const isOpen = nav?.classList.toggle("is-open");
+    toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
+  });
+</script>

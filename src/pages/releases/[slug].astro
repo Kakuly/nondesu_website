@@ -1,0 +1,43 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import GameShell from "../../components/games/GameShell.astro";
+import CollectGame from "../../components/games/CollectGame.astro";
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const releases = await getCollection("releases");
+  return releases.map((release) => ({
+    params: { slug: release.data.slug },
+    props: { release },
+  }));
+}
+
+const { release } = Astro.props;
+const { Content } = await render(release);
+---
+
+<BaseLayout title={release.data.title} description={release.data.subtitle}>
+  <GameShell title={release.data.title} subtitle={release.data.subtitle}>
+    <Fragment slot="intro">
+      <div class="prose">
+        <Content />
+        {
+          release.data.links.length > 0 && (
+            <ul>
+              {release.data.links.map((link) => (
+                <li>
+                  <a href={link.url} target="_blank" rel="noreferrer">{link.label}</a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+    </Fragment>
+    <Fragment slot="hud">
+      <span class="sticker" style="background: var(--sky)">mini game</span>
+      <span class="sticker" style="background: var(--lemon)">tap to collect</span>
+    </Fragment>
+    <CollectGame />
+  </GameShell>
+</BaseLayout>

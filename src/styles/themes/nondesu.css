@@ -1,0 +1,69 @@
+[data-theme="nondesu"] {
+  --cream: #fff8fa;
+  --paper: #fffcfe;
+  --ink: #5c4550;
+  --ink-soft: #8a6b78;
+  --line: rgba(92, 69, 80, 0.1);
+
+  --strawberry: #e8aac0;
+  --strawberry-deep: #c988a0;
+  --mint: #f5d0e0;
+  --mint-deep: #ddb8c8;
+  --lemon: #ffe8f0;
+  --lavender: #e8d0f0;
+  --sky: #ffe0ec;
+
+  --shadow-soft: 0 10px 28px rgba(201, 136, 160, 0.12);
+  --shadow-card: 0 6px 0 rgba(92, 69, 80, 0.04), 0 16px 36px rgba(201, 136, 160, 0.08);
+}
+
+[data-theme="nondesu"] body {
+  background:
+    radial-gradient(900px 420px at 100% -5%, rgba(255, 224, 236, 0.45), transparent 55%),
+    radial-gradient(700px 360px at -5% 20%, rgba(245, 208, 224, 0.32), transparent 50%),
+    radial-gradient(600px 300px at 80% 90%, rgba(232, 208, 240, 0.25), transparent 50%),
+    var(--cream);
+}
+
+[data-theme="nondesu"] .site-header {
+  background: rgba(255, 248, 250, 0.9);
+}
+
+[data-theme="nondesu"] .hero-badge {
+  background: linear-gradient(135deg, var(--lemon), var(--strawberry));
+}
+
+[data-theme="nondesu"] .logo-mark {
+  background: linear-gradient(135deg, var(--strawberry), var(--strawberry-deep));
+}
+
+[data-theme="nondesu"] .hero-splash-blob--1 {
+  background: var(--lemon);
+}
+
+[data-theme="nondesu"] .hero-splash-blob--2 {
+  background: var(--strawberry);
+}
+
+[data-theme="nondesu"] .hero-splash-blob--3 {
+  background: var(--lavender);
+}
+
+[data-theme="nondesu"] .hero-splash-sticker {
+  background: linear-gradient(135deg, var(--strawberry-deep), var(--lavender));
+}
+
+[data-theme="nondesu"] .form-status.is-success {
+  background: rgba(245, 208, 224, 0.45);
+  border-color: var(--mint-deep);
+}
+
+[data-theme="nondesu"] .work-card-cover {
+  background:
+    linear-gradient(135deg, rgba(232, 170, 192, 0.28), rgba(232, 208, 240, 0.28)),
+    var(--cream);
+}
+
+[data-theme="nondesu"] .game-stage {
+  background: linear-gradient(180deg, #ffeef4 0%, #fff8fa 100%);
+}

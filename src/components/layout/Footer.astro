@@ -1,0 +1,32 @@
+---
+interface Props {
+  theme?: "nondesu" | "ichiyakanon";
+}
+
+const { theme = "nondesu" } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>© {year} {theme === "ichiyakanon" ? "苺茶かのん / nondesu" : "nondesu"}</p>
+    <div class="footer-links">
+      {
+        theme === "ichiyakanon" ? (
+          <>
+            <a href="/">nondesu 公式</a>
+            <a href="/portfolio">ポートフォリオ</a>
+          </>
+        ) : (
+          <>
+            <a href="/ichiyakanon/">苺茶かのん</a>
+            <a href="/releases/internet_friends_EP/">internet friends EP</a>
+            <a href="https://x.com/_Non_desu_" target="_blank" rel="noreferrer">X</a>
+            <a href="mailto:nondesu0816@gmail.com">メール</a>
+            <a href="/admin/">管理画面</a>
+          </>
+        )
+      }
+    </div>
+  </div>
+</footer>

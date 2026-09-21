@@ -1,0 +1,28 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  work: CollectionEntry<"works">;
+}
+
+const { work } = Astro.props;
+const { title, data } = work;
+---
+
+<a class="card work-card wiggle-hover" href={`/portfolio/${work.id}/`}>
+  <div class="work-card-cover">
+    {data.cover ? (
+      <img src={data.cover} alt="" loading="lazy" />
+    ) : (
+      <span>{data.category === "music" ? "♪" : data.category === "illustration" ? "✿" : "✎"}</span>
+    )}
+  </div>
+  <div>
+    <div class="work-card-meta">
+      <span class="sticker" style="background: var(--mint)">{data.category}</span>
+      {data.featured && <span class="sticker" style="background: var(--lemon)">featured</span>}
+    </div>
+    <h3>{title}</h3>
+    {data.excerpt && <p>{data.excerpt}</p>}
+  </div>
+</a>

@@ -1,0 +1,133 @@
+<div class="game-island" data-collect-game>
+  <canvas class="game-canvas" width="960" height="540" aria-label="internet friends ミニゲーム"></canvas>
+  <p class="section-lede" data-game-help>画面をタップして、友だちアイコンを集めよう！</p>
+</div>
+
+<script>
+  import { clamp, formatScore } from "../../lib/games/shell";
+
+  const root = document.querySelector("[data-collect-game]");
+  if (!root) throw new Error("Game root not found");
+
+  const canvas = root.querySelector("canvas");
+  const help = root.querySelector("[data-game-help]");
+  if (!(canvas instanceof HTMLCanvasElement) || !(help instanceof HTMLElement)) {
+    throw new Error("Game elements not found");
+  }
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas unsupported");
+
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  type Friend = { x: number; y: number; vx: number; vy: number; size: number; hue: number };
+
+  let score = 0;
+  let timeLeft = prefersReducedMotion ? 999 : 30;
+  let running = true;
+  const friends: Friend[] = [];
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.floor(rect.width * devicePixelRatio);
+    canvas.height = Math.floor((rect.width * 9) / 16 * devicePixelRatio);
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  }
+
+  function spawnFriend() {
+    friends.push({
+      x: Math.random() * canvas.clientWidth,
+      y: Math.random() * canvas.clientHeight,
+      vx: (Math.random() - 0.5) * 2.4,
+      vy: (Math.random() - 0.5) * 2.4,
+      size: 18 + Math.random() * 16,
+      hue: 300 + Math.random() * 80,
+    });
+  }
+
+  for (let i = 0; i < 5; i += 1) spawnFriend();
+
+  function drawFriend(friend: Friend) {
+    ctx.save();
+    ctx.translate(friend.x, friend.y);
+    ctx.fillStyle = `hsl(${friend.hue} 80% 72%)`;
+    ctx.beginPath();
+    ctx.arc(0, 0, friend.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.arc(-friend.size * 0.35, -friend.size * 0.15, friend.size * 0.18, 0, Math.PI * 2);
+    ctx.arc(friend.size * 0.35, -friend.size * 0.15, friend.size * 0.18, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function loop() {
+    if (!running) return;
+    ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.clientHeight);
+    gradient.addColorStop(0, "#dff4ff");
+    gradient.addColorStop(1, "#fff6fb");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+    for (const friend of friends) {
+      friend.x += friend.vx;
+      friend.y += friend.vy;
+      if (friend.x < friend.size || friend.x > canvas.clientWidth - friend.size) friend.vx *= -1;
+      if (friend.y < friend.size || friend.y > canvas.clientHeight - friend.size) friend.vy *= -1;
+      drawFriend(friend);
+    }
+
+    ctx.fillStyle = "#4a3f55";
+    ctx.font = "700 16px sans-serif";
+    ctx.fillText(`Score ${formatScore(score)}`, 16, 28);
+    if (!prefersReducedMotion) {
+      ctx.fillText(`Time ${Math.ceil(timeLeft)}`, 16, 52);
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  canvas.addEventListener("pointerdown", (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    for (let i = friends.length - 1; i >= 0; i -= 1) {
+      const friend = friends[i];
+      const dx = x - friend.x;
+      const dy = y - friend.y;
+      if (Math.hypot(dx, dy) <= friend.size + 8) {
+        friends.splice(i, 1);
+        score += 100;
+        spawnFriend();
+        help.textContent = `いいね！ ${formatScore(score)} 点`;
+        break;
+      }
+    }
+  });
+
+  if (!prefersReducedMotion) {
+    setInterval(() => {
+      if (!running) return;
+      timeLeft -= 1;
+      if (timeLeft <= 0) {
+        running = false;
+        help.textContent = `タイムアップ！ スコア ${formatScore(score)}`;
+      }
+    }, 1000);
+  }
+
+  resize();
+  window.addEventListener("resize", resize);
+  loop();
+</script>
+
+<style>
+  .game-island {
+    display: grid;
+    gap: 0.75rem;
+  }
+</style>

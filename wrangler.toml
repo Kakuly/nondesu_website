@@ -1,0 +1,12 @@
+# Cloudflare Pages 用の設定。
+# Astro ビルド後の dist/ を配信します。
+name = "nondesu"
+compatibility_date = "2026-09-21"
+pages_build_output_dir = "./dist"
+
+[vars]
+CONTACT_EMAIL = "nondesu0816@gmail.com"
+
+# GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET は Dashboard の Environment variables に設定。
+# wrangler.toml や git にシークレットを書かないこと。
+# Decap CMS 手順: docs/DECAP-CMS-PRODUCTION.md

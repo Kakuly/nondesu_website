@@ -1,0 +1,71 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Sticker from "../../components/ui/Sticker.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const works = await getCollection("works");
+  return works.map((work) => ({
+    params: { slug: work.id },
+    props: { work },
+  }));
+}
+
+const { work } = Astro.props;
+const categoryLabels = {
+  music: "楽曲",
+  illustration: "イラスト",
+  writing: "文章",
+} as const;
+---
+
+<BaseLayout title={work.data.title} current="portfolio">
+  <section class="section">
+    <div class="wrap narrow reading-panel prose">
+      <Sticker label={categoryLabels[work.data.category]} tone="mint" />
+      <h1>{work.data.title}</h1>
+      {work.data.excerpt && <p>{work.data.excerpt}</p>}
+      <p><time datetime={work.data.date.toISOString()}>{work.data.date.toLocaleDateString("ja-JP")}</time></p>
+
+      {
+        work.data.embed?.type === "youtube" && (
+          <div style="aspect-ratio:16/9; border-radius: var(--radius-md); overflow:hidden; border:2px solid var(--line);">
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${work.data.embed.id}`}
+              title={work.data.title}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+        )
+      }
+
+      {
+        work.data.gallery && (
+          <div class="toy-grid">
+            {work.data.gallery.map((image) => (
+              <img src={image} alt="" loading="lazy" style="border-radius: var(--radius-md); border:2px solid var(--line);" />
+            ))}
+          </div>
+        )
+      }
+
+      {
+        work.data.links.length > 0 && (
+          <ul>
+            {work.data.links.map((link) => (
+              <li>
+                <a href={link.url} target="_blank" rel="noreferrer">{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+
+      <p><a href="/portfolio">← ポートフォリオ一覧</a></p>
+    </div>
+  </section>
+</BaseLayout>

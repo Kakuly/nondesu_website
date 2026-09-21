@@ -1,0 +1,94 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Card from "../components/ui/Card.astro";
+import CommissionForm from "../components/forms/CommissionForm.astro";
+import Sticker from "../components/ui/Sticker.astro";
+---
+
+<BaseLayout title="依頼について" current="commissions">
+  <section class="section">
+    <div class="wrap">
+      <h1 class="section-title">依頼について</h1>
+      <p class="section-lede">
+        ボーカル・作詞・映像・イラストのご依頼を受け付けています。内容を確認のうえ、のんですから返信します。
+      </p>
+
+      <div class="commission-grid">
+        <div class="reading-panel prose">
+          <div class="commission-status">
+            <Sticker label="受付中" tone="mint" />
+            <p class="commission-status-note">
+              お見積もりのみ・下記に当てはまらない内容も、お気軽にご相談ください。
+            </p>
+          </div>
+
+          <h2>連絡・お支払い</h2>
+          <ul class="commission-facts">
+            <li><strong>連絡先</strong> — X DM（@_Non_desu_）/ メール</li>
+            <li><strong>お支払い</strong> — PayPal・銀行振込・PayPay</li>
+            <li>
+              <strong>割引</strong> — 納期2ヶ月以上＋前払いの場合、ご依頼料金10% off
+            </li>
+          </ul>
+
+          <h2>カテゴリと目安</h2>
+          <div class="commission-categories">
+            <Card kicker="ボーカル">
+              <ul>
+                <li>歌唱 — ¥15,000〜 / 2–3週間〜</li>
+                <li>仮歌 — ¥4,000〜 / 1–2週間〜</li>
+              </ul>
+            </Card>
+            <Card kicker="作詞">
+              <ul>
+                <li>1曲 — ¥15,000〜 / 2週間〜（仮歌付き）</li>
+              </ul>
+            </Card>
+            <Card kicker="映像">
+              <ul>
+                <li>Simple — ¥5,000〜 / 1–2週間〜</li>
+                <li>Advanced — ¥12,000〜 / 2–3週間〜</li>
+                <li>Animation (Loop) — ¥10,000〜 / 2週間〜</li>
+              </ul>
+            </Card>
+            <Card kicker="イラスト">
+              <ul>
+                <li>Illustration 4種（A–D）— <em>料金表準備中</em></li>
+                <li>Animation (Loop) — ¥15,000〜 / 2–3週間〜</li>
+              </ul>
+            </Card>
+          </div>
+          <p class="commission-disclaimer">
+            納期・商用利用・個人/企業などにより料金は変動します。詳細はお見積もり時にご案内します。
+          </p>
+
+          <h2>受付の流れ</h2>
+          <ol>
+            <li>フォームまたは X / メールで内容を送る</li>
+            <li>可否・料金・スケジュールをご連絡</li>
+            <li>合意後、制作開始</li>
+          </ol>
+
+          <h2>NG例</h2>
+          <ul>
+            <li>公序良俗に反する内容</li>
+            <li>無断商用利用を前提とした依頼</li>
+            <li>極端に短い納期で品質保証が難しい案件</li>
+          </ul>
+
+          <h2>その他の連絡方法</h2>
+          <div class="contact-alt">
+            <a href="https://x.com/_Non_desu_" target="_blank" rel="noreferrer">X DM で連絡（@_Non_desu_）</a>
+            <a href="mailto:nondesu0816@gmail.com">メールで連絡（nondesu0816@gmail.com）</a>
+          </div>
+        </div>
+
+        <Card kicker="form">
+          <h3>依頼フォーム</h3>
+          <p>内容が整理しやすいので、フォームからの送信がおすすめです。</p>
+          <CommissionForm />
+        </Card>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

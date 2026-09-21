@@ -1,0 +1,36 @@
+:root {
+  --font-body: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  --font-display: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", var(--font-body);
+
+  --cream: #fff8fa;
+  --paper: #fffcfe;
+  --ink: #5c4550;
+  --ink-soft: #8a6b78;
+  --line: rgba(92, 69, 80, 0.1);
+
+  --strawberry: #e8aac0;
+  --strawberry-deep: #c988a0;
+  --mint: #f5d0e0;
+  --mint-deep: #ddb8c8;
+  --lemon: #ffe8f0;
+  --lavender: #e8d0f0;
+  --sky: #ffe0ec;
+
+  --shadow-soft: 0 10px 28px rgba(201, 136, 160, 0.12);
+  --shadow-card: 0 6px 0 rgba(92, 69, 80, 0.04), 0 16px 36px rgba(201, 136, 160, 0.08);
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 3rem;
+  --space-6: 4.5rem;
+
+  --header-height: 4.5rem;
+  --content-width: 1080px;
+  --narrow-width: 720px;
+}

@@ -1,0 +1,25 @@
+---
+interface Props {
+  title: string;
+  subtitle?: string;
+}
+
+const { title, subtitle } = Astro.props;
+---
+
+<section class="game-shell wrap">
+  <div>
+    <span class="hero-badge">♪ Release Room</span>
+    <h1 class="section-title">{title}</h1>
+    {subtitle && <p class="section-lede">{subtitle}</p>}
+    <slot name="intro" />
+  </div>
+  <div class="reading-panel">
+    <div class="game-hud">
+      <slot name="hud" />
+    </div>
+    <div class="game-stage">
+      <slot />
+    </div>
+  </div>
+</section>
