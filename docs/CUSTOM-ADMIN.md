@@ -53,6 +53,20 @@ node -e "crypto=require('crypto');console.log(crypto.createHash('sha256').update
 
 本番では `ADMIN_PASSWORD_HASH` のみ設定し、平文 `ADMIN_PASSWORD` は設定しないことを推奨。
 
+### Cloudflare Access（メール二段階・推奨）
+
+admin は公開サイトを書き換えられるため、**Access で外側からも守る**ことを推奨。
+
+1. [Cloudflare Zero Trust](https://one.dash.cloudflare.com/) → **Access** → **Applications** → Add
+2. 種類: **Self-hosted**（SaaS / Infrastructure / Bookmark ではない）
+3. Application domain: `admin.nondesu.com`（Path: `/` で全体）
+4. Policy: のんです・運用者の **メールアドレス** のみ Allow
+5. Identity: **One-time PIN**（メール）を有効化
+
+流れ: **メール PIN（Access）** → **ユーザー名/パスワード（独自 admin）** → 編集。
+
+> 独自 admin 内蔵のメール OTP は未実装。Access を使うと開発コストが最小。
+
 ### GitHub PAT
 
 - 対象リポジトリ: `Kakuly/nondesu_website`
@@ -125,6 +139,18 @@ Decap（`public/admin/config.yml` + GitHub OAuth）は**本番パスから削除
 - 詳細な移行履歴 → [`DECAP-CMS-PRODUCTION.md`](./DECAP-CMS-PRODUCTION.md) 先頭の注記
 
 Phase A（SITE ハブ iframe + ローカル dev）は Astro 開発用として引き続き利用可能。
+
+---
+
+## セキュリティ（現状と今後）
+
+| 対策 | 状態 |
+|------|------|
+| HTTPS + HttpOnly セッション Cookie | ✓ |
+| パスワード hash（`ADMIN_PASSWORD_HASH`） | ✓ 推奨 |
+| GitHub PAT はサーバー側のみ | ✓ |
+| Cloudflare Access（メール PIN） | **運用者が Zero Trust で設定** |
+| ログイン rate limit / CSRF トークン | 未実装（将来） |
 
 ---
 
