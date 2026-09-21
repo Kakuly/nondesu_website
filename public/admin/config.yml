@@ -4,7 +4,7 @@
 # 3. GitHub OAuth App の callback に {CMS origin}/api/callback を登録
 backend:
   name: github
-  repo: YOUR_USER/nondesu
+  repo: Kakuly/nondesu_website
   branch: main
   auth_endpoint: api/auth
 
