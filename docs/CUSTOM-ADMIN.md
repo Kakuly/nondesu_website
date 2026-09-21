@@ -9,7 +9,7 @@
 | 項目 | 値 |
 |------|-----|
 | **入口** | `https://admin.nondesu.com/` → `/admin/` |
-| **認証** | `ADMIN_USERNAME` + `ADMIN_PASSWORD`（または hash）→ HttpOnly セッション Cookie |
+| **認証** | 2 アカウント（`ADMIN_USER_1` / `ADMIN_PASS_1` など）→ HttpOnly セッション Cookie |
 | **保存** | Cloudflare Functions が `GITHUB_TOKEN` で GitHub Contents API に commit |
 | **公開サイト** | `https://nondesu.com`（変更なし） |
 
@@ -36,22 +36,36 @@ Dashboard → **Workers & Pages** → プロジェクト → **Settings** → **
 
 | 名前 | 必須 | 説明 |
 |------|------|------|
-| `ADMIN_USERNAME` | ✓ | ログイン用ユーザー名 |
-| `ADMIN_PASSWORD` | ✓* | 平文パスワード（*hash 使用時は省略可） |
-| `ADMIN_PASSWORD_HASH` | ✓* | SHA-256 hex（小文字）。`*` 平文とどちらか一方 |
+| `ADMIN_USER_1` | ✓ | 1人目のログイン用ユーザー名（例: `nondesu`） |
+| `ADMIN_PASS_1` | ✓ | 1人目のパスワード（平文で OK — 外側に Access PIN あり） |
+| `ADMIN_USER_2` | ✓ | 2人目のログイン用ユーザー名（例: `kakuly`） |
+| `ADMIN_PASS_2` | ✓ | 2人目のパスワード |
 | `SESSION_SECRET` | ✓ | セッション署名用ランダム文字列（32+ 文字推奨） |
 | `GITHUB_TOKEN` | ✓ | repo write 権限の PAT（Fine-grained または classic） |
 | `GITHUB_REPO` | | 省略時 `Kakuly/nondesu_website` |
 | `GITHUB_BRANCH` | | 省略時 `main` |
 | `CONTACT_EMAIL` | | 依頼フォーム用（admin とは無関係） |
 
-### パスワード hash の生成
+### 2 アカウントの例（Kakuly 向け）
 
-```bash
-node -e "crypto=require('crypto');console.log(crypto.createHash('sha256').update('your-password').digest('hex'))"
+Cloudflare Dashboard → Environment variables に次の 4 つを追加（Production / Preview 両方）:
+
+```env
+ADMIN_USER_1=nondesu
+ADMIN_PASS_1=<のんです用パスワード>
+ADMIN_USER_2=kakuly
+ADMIN_PASS_2=<運用者用パスワード>
 ```
 
-本番では `ADMIN_PASSWORD_HASH` のみ設定し、平文 `ADMIN_PASSWORD` は設定しないことを推奨。
+- **のんです** — ユーザー名 `nondesu` + 本人用パスワード
+- **Kakuly（運用者）** — ユーザー名 `kakuly` + 運用者用パスワード
+- ログイン後、セッション Cookie にユーザー名が入る（どちらのアカウントか区別可能）
+- 外側の **Cloudflare Access（メール PIN）** が先にかかるため、平文パスワードでも運用上問題ない想定
+
+### 旧 1 アカウント設定（後方互換）
+
+移行前の `ADMIN_USERNAME` + `ADMIN_PASSWORD`（または `ADMIN_PASSWORD_HASH`）も引き続き動作する。  
+**新しい 4 変数のどれか 1 組でも設定されている場合は、新設定が優先**され旧変数は無視される。
 
 ### Cloudflare Access（メール二段階・推奨）
 
@@ -116,8 +130,10 @@ npm run pages:dev
 `.dev.vars`（git 忽略）例:
 
 ```env
-ADMIN_USERNAME=nondesu
-ADMIN_PASSWORD=dev-only-password
+ADMIN_USER_1=nondesu
+ADMIN_PASS_1=dev-nondesu-password
+ADMIN_USER_2=kakuly
+ADMIN_PASS_2=dev-kakuly-password
 SESSION_SECRET=local-dev-secret-change-me
 GITHUB_TOKEN=ghp_...
 GITHUB_REPO=Kakuly/nondesu_website
@@ -147,7 +163,8 @@ Phase A（SITE ハブ iframe + ローカル dev）は Astro 開発用として�
 | 対策 | 状態 |
 |------|------|
 | HTTPS + HttpOnly セッション Cookie | ✓ |
-| パスワード hash（`ADMIN_PASSWORD_HASH`） | ✓ 推奨 |
+| 2 アカウント（のんです + 運用者） | ✓ |
+| タイミングセーフなパスワード照合 | ✓ |
 | GitHub PAT はサーバー側のみ | ✓ |
 | Cloudflare Access（メール PIN） | **運用者が Zero Trust で設定** |
 | ログイン rate limit / CSRF トークン | 未実装（将来） |
@@ -162,6 +179,7 @@ Phase A（SITE ハブ iframe + ローカル dev）は Astro 開発用として�
 | `src/layouts/AdminLayout.astro` | admin 共通レイアウト |
 | `src/styles/admin.css` | pastel / おもちゃ箱トーン |
 | `functions/api/admin/` | login / session / content API |
+| `functions/lib/admin-users.ts` | 複数 admin アカウントの読み込み・照合 |
 | `functions/lib/session.ts` | HMAC セッション Cookie |
 | `functions/lib/github.ts` | GitHub Contents API |
 | `functions/lib/yaml-content.ts` | YAML ↔ JSON（MVP スキーマ限定） |

@@ -61,8 +61,8 @@ Cloudflare Pages の **Settings → Environment variables** に設定:
 
 | 名前 | 用途 |
 |------|------|
-| `ADMIN_USERNAME` | カスタム admin ログイン |
-| `ADMIN_PASSWORD` または `ADMIN_PASSWORD_HASH` | カスタム admin パスワード |
+| `ADMIN_USER_1` / `ADMIN_PASS_1` | カスタム admin（1人目、例: nondesu） |
+| `ADMIN_USER_2` / `ADMIN_PASS_2` | カスタム admin（2人目、例: kakuly） |
 | `SESSION_SECRET` | セッション Cookie 署名 |
 | `GITHUB_TOKEN` | admin から GitHub に commit（PAT） |
 | `GITHUB_REPO` | （任意）省略時 `Kakuly/nondesu_website` |

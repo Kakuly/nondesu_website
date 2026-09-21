@@ -1,5 +1,5 @@
+import { adminUsersConfigured, verifyAdminLogin } from "../../lib/admin-users";
 import type { PagesEnv } from "../../lib/env";
-import { verifyPassword } from "../../lib/password";
 import { createSessionToken, sessionCookieHeader } from "../../lib/session";
 
 interface LoginContext {
@@ -17,19 +17,18 @@ export async function onRequestPost(context: LoginContext): Promise<Response> {
     return Response.json({ ok: false, message: "JSON の形式が正しくありません。" }, { status: 400 });
   }
 
-  const username = env.ADMIN_USERNAME?.trim();
   const secret = env.SESSION_SECRET?.trim();
-
-  if (!username || !secret) {
-    return Response.json(
-      { ok: false, message: "ADMIN_USERNAME / SESSION_SECRET が未設定です。" },
-      { status: 500 },
-    );
+  if (!secret) {
+    return Response.json({ ok: false, message: "SESSION_SECRET が未設定です。" }, { status: 500 });
   }
 
-  if (!env.ADMIN_PASSWORD && !env.ADMIN_PASSWORD_HASH) {
+  if (!adminUsersConfigured(env)) {
     return Response.json(
-      { ok: false, message: "ADMIN_PASSWORD または ADMIN_PASSWORD_HASH が未設定です。" },
+      {
+        ok: false,
+        message:
+          "ADMIN_USER_1 / ADMIN_PASS_1（および ADMIN_USER_2 / ADMIN_PASS_2）が未設定です。旧設定の場合は ADMIN_USERNAME / ADMIN_PASSWORD を確認してください。",
+      },
       { status: 500 },
     );
   }
@@ -38,12 +37,8 @@ export async function onRequestPost(context: LoginContext): Promise<Response> {
     return Response.json({ ok: false, message: "ユーザー名とパスワードを入力してください。" }, { status: 400 });
   }
 
-  if (body.username !== username) {
-    return Response.json({ ok: false, message: "ログイン情報が正しくありません。" }, { status: 401 });
-  }
-
-  const valid = await verifyPassword(body.password, env);
-  if (!valid) {
+  const username = await verifyAdminLogin(body.username, body.password, env);
+  if (!username) {
     return Response.json({ ok: false, message: "ログイン情報が正しくありません。" }, { status: 401 });
   }
 

@@ -1,4 +1,4 @@
-function timingSafeEqual(a: string, b: string): boolean {
+export function timingSafeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let result = 0;
   for (let i = 0; i < a.length; i++) {
@@ -15,18 +15,34 @@ export async function hashPassword(password: string): Promise<string> {
     .join("");
 }
 
+export interface PasswordCredentials {
+  password?: string;
+  passwordHash?: string;
+}
+
+export async function verifyPasswordAgainstCredentials(
+  password: string,
+  credentials: PasswordCredentials,
+): Promise<boolean> {
+  if (credentials.passwordHash) {
+    const hash = await hashPassword(password);
+    return timingSafeEqual(hash, credentials.passwordHash);
+  }
+
+  if (credentials.password) {
+    return timingSafeEqual(password, credentials.password);
+  }
+
+  return false;
+}
+
+/** @deprecated Prefer verifyAdminLogin from admin-users.ts */
 export async function verifyPassword(
   password: string,
   env: { ADMIN_PASSWORD?: string; ADMIN_PASSWORD_HASH?: string },
 ): Promise<boolean> {
-  if (env.ADMIN_PASSWORD_HASH) {
-    const hash = await hashPassword(password);
-    return timingSafeEqual(hash, env.ADMIN_PASSWORD_HASH.trim().toLowerCase());
-  }
-
-  if (env.ADMIN_PASSWORD) {
-    return timingSafeEqual(password, env.ADMIN_PASSWORD);
-  }
-
-  return false;
+  return verifyPasswordAgainstCredentials(password, {
+    password: env.ADMIN_PASSWORD,
+    passwordHash: env.ADMIN_PASSWORD_HASH?.trim().toLowerCase(),
+  });
 }
