@@ -14,7 +14,7 @@
 
 ---
 
-**のんです公式（Astro + Decap CMS）。Kakuly.github.io ではない。** → [`../WORKSPACES.md`](../WORKSPACES.md)
+**のんです公式（Astro + カスタム admin）。Kakuly.github.io ではない。** → [`../WORKSPACES.md`](../WORKSPACES.md)
 
 | 項目 | 値 |
 |------|-----|
@@ -29,15 +29,15 @@ npm install && npm run dev    # :4321
 npm run build && npm run pages:dev   # Functions 付き
 ```
 
-## CMS
+## CMS / admin
 
-- **Phase A（dev）**: SITE → **のんです** — dev 起動時 CMS iframe（`:4321/admin/`）。dev 未起動 → iframe 不可
-- **Phase B（production）**: GitHub OAuth → commit → Cloudflare Pages 自動反映。手順 → [`docs/DECAP-CMS-PRODUCTION.md`](docs/DECAP-CMS-PRODUCTION.md)
+- **Phase A（dev）**: SITE → **のんです** — dev 起動時 admin iframe（`:4321/admin/`）。dev 未起動 → iframe 不可
+- **Phase B（production）**: カスタム admin（ユーザー名/パスワード）→ GITHUB_TOKEN で commit → Cloudflare Pages 自動反映。手順 → [`docs/CUSTOM-ADMIN.md`](docs/CUSTOM-ADMIN.md)
 - SITE ハブ UI 変更時のみ → `../discord-notify/bin/sync-jekyll-site`
 
 ## 編集入口
 
-`src/content/profile/nondesu.yaml` · `works/` · `public/admin/config.yml` · `functions/api/contact.ts`
+`src/content/profile/nondesu.yaml` · `works/` · `src/pages/admin/` · `functions/api/admin/` · `functions/api/contact.ts`
 
 ## ⚠️
 

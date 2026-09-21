@@ -12,7 +12,7 @@
 | 依頼 | `/commissions` |
 | EP 特設 | `/releases/internet_friends_EP/` |
 | 苺茶かのん | `/ichiyakanon/` |
-| CMS | `/admin/` |
+| admin（編集） | `https://admin.nondesu.com/` → `/admin/` |
 
 ## 必要なもの
 
@@ -61,8 +61,11 @@ Cloudflare Pages の **Settings → Environment variables** に設定:
 
 | 名前 | 用途 |
 |------|------|
-| `GITHUB_CLIENT_ID` | Decap CMS — GitHub OAuth（Phase B 本番 CMS） |
-| `GITHUB_CLIENT_SECRET` | Decap CMS — GitHub OAuth |
+| `ADMIN_USERNAME` | カスタム admin ログイン |
+| `ADMIN_PASSWORD` または `ADMIN_PASSWORD_HASH` | カスタム admin パスワード |
+| `SESSION_SECRET` | セッション Cookie 署名 |
+| `GITHUB_TOKEN` | admin から GitHub に commit（PAT） |
+| `GITHUB_REPO` | （任意）省略時 `Kakuly/nondesu_website` |
 | `CONTACT_EMAIL` | 依頼フォームの宛先 |
 | `PUBLIC_TURNSTILE_SITE_KEY` | （任意）Turnstile サイトキー |
 | `TURNSTILE_SECRET_KEY` | （任意）Turnstile シークレット |
@@ -77,25 +80,18 @@ Cloudflare Pages の **Settings → Environment variables** に設定:
 
 ドメイン取得前は [https://nondesu-website.pages.dev](https://nondesu-website.pages.dev) で公開（リポジトリ: `Kakuly/nondesu_website`）。
 
-## Decap CMS（/admin）
+## カスタム admin（/admin）
 
-のんです本人もブラウザから内容を更新できます（**Phase B — 本番**）。Mac 常時起動は不要。
+のんです本人もブラウザから内容を更新できます（**GitHub アカウント不要**）。Mac 常時起動は不要。
 
 | Phase | 用途 | URL |
 |-------|------|-----|
-| **A（dev）** | Site Studio iframe・ローカル開発 | `http://127.0.0.1:4321/admin/`（`npm run dev` 必須） |
-| **B（production）** | GitHub OAuth → commit → 自動デプロイ | MVP: `https://<project>.pages.dev/admin/` → 将来 `https://admin.nondesu.com/admin/` |
+| **A（dev）** | Site Studio iframe・UI 確認 | `http://127.0.0.1:4321/admin/`（静的 UI のみ。API は `pages:dev`） |
+| **B（production）** | ユーザー名/パスワード → commit → 自動デプロイ | `https://admin.nondesu.com/` |
 
-**セットアップ手順（OAuth App・環境変数・検証・ドメイン移行）**: [docs/DECAP-CMS-PRODUCTION.md](docs/DECAP-CMS-PRODUCTION.md)
+**セットアップ手順**: [docs/CUSTOM-ADMIN.md](docs/CUSTOM-ADMIN.md)
 
-要点:
-
-1. [public/admin/config.yml](public/admin/config.yml) の `repo` が `Kakuly/nondesu_website` であること（済）
-2. GitHub OAuth App — callback は **`{CMS origin}/api/callback`**（`/admin/` ではない）
-3. Cloudflare に `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` を設定
-4. `/admin/` から Login with GitHub → 編集 → Publish
-
-保存すると GitHub に commit され、Cloudflare Pages が自動再デプロイします。
+保存すると Cloudflare Functions が `GITHUB_TOKEN` で GitHub に commit し、Cloudflare Pages が自動再デプロイします。
 
 ## コンテンツの編集（開発者向け）
 
@@ -132,10 +128,9 @@ Cloudflare Pages の **Settings → Environment variables** に設定:
 │   ├── lib/games/
 │   ├── pages/
 │   └── styles/         # デザイントークン・テーマ
-├── public/
-│   ├── admin/          # Decap CMS
-│   └── assets/
-├── functions/api/      # 依頼フォーム + Decap OAuth (auth, callback)
+├── public/assets/
+├── functions/api/      # 依頼フォーム + admin API
+│   └── admin/          # login / session / content
 ├── astro.config.mjs
 └── wrangler.toml
 ```

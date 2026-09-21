@@ -1,0 +1,179 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="作品を編集">
+  <section class="admin-card">
+    <h2 class="admin-card-title">作品を編集</h2>
+    <p id="work-path" class="admin-hint">読み込み中…</p>
+    <p id="work-loading" class="admin-loading">読み込み中…</p>
+
+    <form id="work-form" class="admin-grid admin-grid-2" hidden>
+      <div class="admin-field">
+        <label for="title">タイトル</label>
+        <input id="title" name="title" required />
+      </div>
+      <div class="admin-field">
+        <label for="category">カテゴリ</label>
+        <select id="category" name="category" required>
+          <option value="music">music</option>
+          <option value="illustration">illustration</option>
+          <option value="writing">writing</option>
+        </select>
+      </div>
+      <div class="admin-field">
+        <label for="date">日付 (YYYY-MM-DD)</label>
+        <input id="date" name="date" type="date" required />
+      </div>
+      <div class="admin-field">
+        <label for="featured">featured</label>
+        <select id="featured" name="featured">
+          <option value="false">false</option>
+          <option value="true">true</option>
+        </select>
+      </div>
+      <div class="admin-field" style="grid-column: 1 / -1;">
+        <label for="excerpt">概要 (excerpt)</label>
+        <textarea id="excerpt" name="excerpt" rows="3"></textarea>
+      </div>
+      <div class="admin-field" style="grid-column: 1 / -1;">
+        <label for="tags">タグ — 1行に1つ</label>
+        <textarea id="tags" name="tags" rows="3"></textarea>
+      </div>
+      <div class="admin-field">
+        <label for="embedType">embed type</label>
+        <select id="embedType" name="embedType">
+          <option value="">（なし）</option>
+          <option value="youtube">youtube</option>
+          <option value="spotify">spotify</option>
+          <option value="soundcloud">soundcloud</option>
+        </select>
+      </div>
+      <div class="admin-field">
+        <label for="embedId">embed id</label>
+        <input id="embedId" name="embedId" />
+      </div>
+      <div class="admin-field" style="grid-column: 1 / -1;">
+        <label for="links">リンク — <code>ラベル|URL</code> を1行に1つ</label>
+        <textarea id="links" name="links" rows="4"></textarea>
+      </div>
+      <div class="admin-actions" style="grid-column: 1 / -1;">
+        <button type="submit" class="admin-btn admin-btn-primary">保存する</button>
+        <a class="admin-btn admin-btn-secondary" href="/admin/works/">一覧へ</a>
+      </div>
+    </form>
+
+    <p id="work-status" class="admin-status" role="status"></p>
+  </section>
+</AdminLayout>
+
+<script>
+  import { apiJson, requireSession, showStatus } from "../../../scripts/admin/client";
+
+  interface WorkData {
+    title: string;
+    category: "music" | "illustration" | "writing";
+    tags: string[];
+    excerpt?: string;
+    featured?: boolean;
+    date: string;
+    embed?: { type: string; id: string };
+    links: Array<{ label: string; url: string }>;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get("slug")?.trim() ?? "";
+
+  const form = document.getElementById("work-form") as HTMLFormElement | null;
+  const loading = document.getElementById("work-loading");
+  const pathHint = document.getElementById("work-path");
+  const status = document.getElementById("work-status");
+  let currentSha = "";
+
+  function parseLines(text: string) {
+    return text
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+  }
+
+  function parseLinks(text: string) {
+    return parseLines(text).map((line) => {
+      const [label, url] = line.split("|").map((part) => part.trim());
+      return { label: label ?? "", url: url ?? "" };
+    });
+  }
+
+  function formatLinks(items: Array<{ label: string; url: string }>) {
+    return items.map((item) => `${item.label}|${item.url}`).join("\n");
+  }
+
+  async function loadWork() {
+    if (!slug) {
+      if (pathHint) pathHint.textContent = "slug が指定されていません。";
+      if (loading) loading.hidden = true;
+      showStatus(status, "URL に ?slug=... を付けてください。", "error");
+      return;
+    }
+
+    if (pathHint) pathHint.innerHTML = `<code>src/content/works/${slug}.yaml</code>`;
+
+    await requireSession();
+    const result = await apiJson<{ data: WorkData; sha: string }>(`/api/admin/content/works/${slug}`);
+    currentSha = result.sha;
+    const data = result.data;
+
+    (document.getElementById("title") as HTMLInputElement).value = data.title;
+    (document.getElementById("category") as HTMLSelectElement).value = data.category;
+    (document.getElementById("date") as HTMLInputElement).value = data.date;
+    (document.getElementById("featured") as HTMLSelectElement).value = data.featured ? "true" : "false";
+    (document.getElementById("excerpt") as HTMLTextAreaElement).value = data.excerpt ?? "";
+    (document.getElementById("tags") as HTMLTextAreaElement).value = data.tags.join("\n");
+    (document.getElementById("embedType") as HTMLSelectElement).value = data.embed?.type ?? "";
+    (document.getElementById("embedId") as HTMLInputElement).value = data.embed?.id ?? "";
+    (document.getElementById("links") as HTMLTextAreaElement).value = formatLinks(data.links);
+
+    if (loading) loading.hidden = true;
+    if (form) form.hidden = false;
+  }
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const embedType = (document.getElementById("embedType") as HTMLSelectElement).value;
+    const embedId = (document.getElementById("embedId") as HTMLInputElement).value.trim();
+
+    const data: WorkData = {
+      title: (document.getElementById("title") as HTMLInputElement).value.trim(),
+      category: (document.getElementById("category") as HTMLSelectElement).value as WorkData["category"],
+      date: (document.getElementById("date") as HTMLInputElement).value,
+      featured: (document.getElementById("featured") as HTMLSelectElement).value === "true",
+      excerpt: (document.getElementById("excerpt") as HTMLTextAreaElement).value.trim(),
+      tags: parseLines((document.getElementById("tags") as HTMLTextAreaElement).value),
+      links: parseLinks((document.getElementById("links") as HTMLTextAreaElement).value),
+    };
+
+    if (embedType && embedId) {
+      data.embed = { type: embedType, id: embedId };
+    }
+
+    try {
+      const result = await apiJson<{ sha: string | null; message?: string }>(
+        `/api/admin/content/works/${slug}`,
+        {
+          method: "PUT",
+          body: JSON.stringify({ data, sha: currentSha }),
+        },
+      );
+      if (result.sha) currentSha = result.sha;
+      showStatus(status, result.message ?? "保存しました。", "success");
+    } catch (error) {
+      showStatus(status, error instanceof Error ? error.message : "保存に失敗しました。", "error");
+    }
+  });
+
+  loadWork().catch((error) => {
+    if (loading) {
+      loading.textContent = error instanceof Error ? error.message : "読み込みに失敗しました。";
+    }
+  });
+</script>

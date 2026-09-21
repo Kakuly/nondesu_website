@@ -1,0 +1,111 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="プロフィール">
+  <section class="admin-card">
+    <h2 class="admin-card-title">プロフィール</h2>
+    <p class="admin-hint"><code>src/content/profile/nondesu.yaml</code> を編集します。</p>
+    <p id="profile-loading" class="admin-loading">読み込み中…</p>
+
+    <form id="profile-form" class="admin-grid" hidden>
+      <div class="admin-field">
+        <label for="shortBio">短い紹介 (shortBio)</label>
+        <textarea id="shortBio" name="shortBio" required></textarea>
+      </div>
+      <div class="admin-field">
+        <label for="longBio">長い紹介 (longBio)</label>
+        <textarea id="longBio" name="longBio" required rows="8"></textarea>
+      </div>
+      <div class="admin-field">
+        <label for="roles">肩書き (roles) — 1行に1つ</label>
+        <textarea id="roles" name="roles" rows="4"></textarea>
+      </div>
+      <div class="admin-field">
+        <label for="sns">SNS — <code>ラベル|URL</code> を1行に1つ</label>
+        <textarea id="sns" name="sns" rows="5" placeholder="X|https://x.com/_Non_desu_"></textarea>
+      </div>
+      <div class="admin-actions">
+        <button type="submit" class="admin-btn admin-btn-primary">保存する</button>
+        <a class="admin-btn admin-btn-secondary" href="/admin/">戻る</a>
+      </div>
+    </form>
+
+    <p id="profile-status" class="admin-status" role="status"></p>
+  </section>
+</AdminLayout>
+
+<script>
+  import { apiJson, requireSession, showStatus } from "../../scripts/admin/client";
+
+  interface ProfileData {
+    shortBio: string;
+    longBio: string;
+    roles: string[];
+    sns: Array<{ label: string; url: string }>;
+  }
+
+  const form = document.getElementById("profile-form") as HTMLFormElement | null;
+  const loading = document.getElementById("profile-loading");
+  const status = document.getElementById("profile-status");
+  let currentSha = "";
+
+  function parseSnsLines(text: string) {
+    return text
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [label, url] = line.split("|").map((part) => part.trim());
+        return { label: label ?? "", url: url ?? "" };
+      });
+  }
+
+  function formatSnsLines(items: Array<{ label: string; url: string }>) {
+    return items.map((item) => `${item.label}|${item.url}`).join("\n");
+  }
+
+  async function loadProfile() {
+    await requireSession();
+    const result = await apiJson<{ data: ProfileData; sha: string }>("/api/admin/content/profile");
+    currentSha = result.sha;
+
+    (document.getElementById("shortBio") as HTMLTextAreaElement).value = result.data.shortBio;
+    (document.getElementById("longBio") as HTMLTextAreaElement).value = result.data.longBio;
+    (document.getElementById("roles") as HTMLTextAreaElement).value = result.data.roles.join("\n");
+    (document.getElementById("sns") as HTMLTextAreaElement).value = formatSnsLines(result.data.sns);
+
+    if (loading) loading.hidden = true;
+    if (form) form.hidden = false;
+  }
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const data: ProfileData = {
+      shortBio: (document.getElementById("shortBio") as HTMLTextAreaElement).value.trim(),
+      longBio: (document.getElementById("longBio") as HTMLTextAreaElement).value.trim(),
+      roles: (document.getElementById("roles") as HTMLTextAreaElement).value
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean),
+      sns: parseSnsLines((document.getElementById("sns") as HTMLTextAreaElement).value),
+    };
+
+    try {
+      const result = await apiJson<{ sha: string | null; message?: string }>("/api/admin/content/profile", {
+        method: "PUT",
+        body: JSON.stringify({ data, sha: currentSha }),
+      });
+      if (result.sha) currentSha = result.sha;
+      showStatus(status, result.message ?? "保存しました。", "success");
+    } catch (error) {
+      showStatus(status, error instanceof Error ? error.message : "保存に失敗しました。", "error");
+    }
+  });
+
+  loadProfile().catch((error) => {
+    if (loading) {
+      loading.textContent = error instanceof Error ? error.message : "読み込みに失敗しました。";
+    }
+  });
+</script>

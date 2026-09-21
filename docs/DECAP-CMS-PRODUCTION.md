@@ -1,4 +1,9 @@
-# Decap CMS 本番運用（Phase B）
+# Decap CMS 本番運用（Phase B）— **非推奨・置き換え済み**
+
+> **2026-09 以降、本番編集は [CUSTOM-ADMIN.md](./CUSTOM-ADMIN.md) のカスタム admin（ユーザー名/パスワード + GITHUB_TOKEN）に移行しました。**  
+> 以下は Decap CMS + GitHub OAuth 時代の記録です。新規セットアップでは Decap を使わないでください。
+
+---
 
 > Mac を常時起動せず、GitHub OAuth → 編集 → commit → Cloudflare Pages 自動デプロイ。  
 > Phase A（SITE ハブ iframe / ローカル dev）は**開発用**として残し、本番編集は Phase B を使う。

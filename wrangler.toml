@@ -7,6 +7,6 @@ pages_build_output_dir = "./dist"
 [vars]
 CONTACT_EMAIL = "nondesu0816@gmail.com"
 
-# GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET は Dashboard の Environment variables に設定。
+# ADMIN_* / SESSION_SECRET / GITHUB_TOKEN は Dashboard の Environment variables に設定。
 # wrangler.toml や git にシークレットを書かないこと。
-# Decap CMS 手順: docs/DECAP-CMS-PRODUCTION.md
+# カスタム admin 手順: docs/CUSTOM-ADMIN.md

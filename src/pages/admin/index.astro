@@ -1,0 +1,54 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout>
+  <section class="admin-card">
+    <h2 class="admin-card-title">なにを編集する？</h2>
+    <p class="admin-hint">保存すると GitHub に commit され、Cloudflare Pages が自動で再ビルドします。</p>
+    <ul class="admin-nav-list">
+      <li>
+        <a class="admin-nav-link" href="/admin/profile/">
+          プロフィール
+          <span>shortBio · longBio · SNS</span>
+        </a>
+      </li>
+      <li>
+        <a class="admin-nav-link" href="/admin/works/">
+          作品
+          <span>portfolio の YAML</span>
+        </a>
+      </li>
+      <li>
+        <a class="admin-nav-link" href="https://nondesu.com/" target="_blank" rel="noopener noreferrer">
+          公開サイトを見る
+          <span>nondesu.com ↗</span>
+        </a>
+      </li>
+    </ul>
+  </section>
+
+  <section class="admin-card">
+    <h2 class="admin-card-title">ログイン中</h2>
+    <p id="session-user" class="admin-loading">確認中…</p>
+  </section>
+</AdminLayout>
+
+<script>
+  import { requireSession } from "../../scripts/admin/client";
+
+  async function init() {
+    try {
+      const session = await requireSession();
+      const userEl = document.getElementById("session-user");
+      if (userEl && session.username) {
+        userEl.textContent = `${session.username} としてログイン中`;
+        userEl.className = "";
+      }
+    } catch {
+      // redirect handled in requireSession
+    }
+  }
+
+  init();
+</script>
